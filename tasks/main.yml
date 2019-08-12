@@ -9,8 +9,12 @@
 - include: RedHat.yml
   when: ansible_os_family == 'RedHat'
 
+- name: Update plugins
+  become: phz
+  command: /usr/bin/vagrant plugin update
+
 - name: Fix plugins
-  become: yes
+  become: phz
   shell: |
     spawn /usr/bin/vagrant plugin expunge --reinstall
     expect {
@@ -20,5 +24,6 @@
     }
   args:
     executable: /usr/bin/expect
+
 
 
