@@ -1,17 +1,17 @@
 ---
 # Update APT configuration
-- name: add custom repository
-  register: apt_result
-  become: yes
-  apt_repository: >
-    repo="deb https://vagrant-deb.linestarve.com/ any main"
-    state=present
+#- name: add custom repository
+#  register: apt_result
+#  become: yes
+#  apt_repository: >
+#    repo="deb https://vagrant-deb.linestarve.com/ any main"
+#    state=present
 #
 ## Download keys and package lists
-- name: apt-get update
-  apt: update_cache=yes cache_valid_time=0
-  become: yes
-  when: apt_result.changed
+#- name: apt-get update
+#  apt: update_cache=yes cache_valid_time=0
+#  become: yes
+#  when: apt_result.changed
 
 #- name: apt-get update
 #  apt: update_cache=true cache_valid_time=3600
@@ -24,10 +24,13 @@
   become: yes
 
 - name: Check if vagrant is installed
-  command: dpkg-query -W vagrant
-  register: check_vagrant
+  shell: dpkg-query -W vagrant | cut -d ":" -f 2
+  register: vagrant_version
   failed_when: false
-  changed_when: false
+  changed_when: vagrant_version is version(vagrant_target_version,'<')
+
+- debug: 
+    msg: "Version check -  {{ vagrant_version }} < {{ vagrant_target_version }}"
 
 - name: Download Ubuntu vagrant package
   command: wget -O /tmp/vagrant.deb {{vagrant_url}}
@@ -35,11 +38,11 @@
     creates: "/tmp/vagrant.deb"
   register: result_download_vagrant
   until: result_download_vagrant is success
-  when: check_vagrant.rc == 1
+  when: vagrant_version
 
 - name: Install vagrant package
   become: true
   command: gdebi --non-interactive /tmp/vagrant.deb
   register: result_install_vagrant
   until: result_install_vagrant is success
-  when: check_vagrant.rc == 1
+  when: vagrant_version
