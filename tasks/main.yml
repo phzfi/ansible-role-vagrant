@@ -8,3 +8,17 @@
 
 - include: RedHat.yml
   when: ansible_os_family == 'RedHat'
+
+- name: Fix plugins
+  become: yes
+  shell: |
+    spawn /usr/bin/vagrant plugin expunge --reinstall
+    expect {
+      "Continue? [N]:" {
+        send "y\n"; exp_continue
+      }
+    }
+  args:
+    executable: /usr/bin/expect
+
+
