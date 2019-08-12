@@ -1,9 +1,9 @@
 ---
 - name: install vagrant with yum or apt
   action: "{{backcompat_pkg_mgr}} name={{vagrant_url}}"
-  sudo: yes
+  become: yes
   register: result_install_vagrant
-  until: result_install_vagrant|success
+  until: result_install_vagrant is success
   when: backcompat_pkg_mgr == "yum" or backcompat_pkg_mgr == "apt"
 
 # Handle dnf case for Fedora
@@ -17,7 +17,7 @@
 # Use command since dnf was only added as a module in ansible 1.9.0
 - name: install vagrant with dnf
   command: dnf install -y {{vagrant_url}}
-  sudo: yes
+  become: yes
   register: result_install_vagrant_dnf
-  until: result_install_vagrant_dnf|success
-  when: backcompat_pkg_mgr == "dnf" and package_exists_result|failed
+  until: result_install_vagrant_dnf is success
+  when: backcompat_pkg_mgr == "dnf" and package_exists_result is failed
