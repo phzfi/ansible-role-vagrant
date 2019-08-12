@@ -27,10 +27,8 @@
   shell: dpkg-query -W vagrant | cut -d ":" -f 2
   register: vagrant_version
   failed_when: false
-  changed_when: vagrant_version is version(vagrant_target_version,'<')
-
-- debug: 
-    msg: "Version check -  {{ vagrant_version }} < {{ vagrant_target_version }}"
+  changed_when: vagrant_version.stdout is version('2.2.5','<')
+#  changed_when: vagrant_version|string is version(vagrant_target_version,'<')
 
 - name: Download Ubuntu vagrant package
   command: wget -O /tmp/vagrant.deb {{vagrant_url}}
